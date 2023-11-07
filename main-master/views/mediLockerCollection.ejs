@@ -57,13 +57,6 @@
     padding: 0 24px;
   }
 
-  .nav-menu {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 60px;
-  }
-
   .nav-link {
     position: relative;
     text-transform: uppercase;
@@ -107,15 +100,19 @@
 
 <body>
   <main class="h-screen">
-    <nav class="navbar text-black bg-opacity-50 top-0 left-0 right-0">
+    <nav class="navbar my-2 bg-opacity-50 top-0 left-0 right-0">
       <ul class="nav-menu w-[100%] flex justify-around">
-        <div class="nav-menu-sub flex items-center">
+        <div class="w-1/4 flex justify-evenly items-center">
           <% if (user) { %>
-          <div class="p-10">
+          <li class="nav-item mx-4">
+            <a href="/" class="nav-link">Home</a>
+          </li>
+          <div class="mx-4 py-10">
             <div class="dropdown inline-block relative cursor-pointer">
               <span class="py-2 px-2 rounded inline-flex items-center">
                 <span class="nav-link">Services</span>
-                <svg class="ml-2 text-white fill-black h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <svg class="ml-2 text-black fill-black h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                 </svg>
               </span>
@@ -142,16 +139,19 @@
               </ul>
             </div>
           </div>
-          <li class="nav-item -mx-6">
+          <li class="nav-item mx-4">
             <a href="/mediLocker" class="nav-link">HealthLocker</a>
           </li>
         </div>
         <% } else { %>
-        <div class="p-10">
+        <li class="nav-item">
+          <a href="/" class="nav-link">Home</a>
+        </li>
+        <div>
           <div class="dropdown inline-block relative cursor-pointer">
             <span class="py-2 px-4 rounded inline-flex items-center">
               <span class="nav-link">Services</span>
-              <svg class="ml-2 text-white fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <svg class="ml-2 text-black fill-black h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
               </svg>
             </span>
@@ -167,7 +167,7 @@
                 </a>
               </li>
               <li>
-                <a class="rounded-b bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Thyroid
+                <a class="rounded-b bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="/">Thyroid
                 </a>
               </li>
               <li>
@@ -180,14 +180,17 @@
         </div>
         <% } %>
         </div>
-        <div>
-          <a href="/" class="nav-branding w-auto">
+        <div class="w-1/2 flex justify-center items-center">
+          <a href="/" class="nav-branding">
             <i class="fa-solid fa-laptop-medical"></i>
             Health<sup>2</sup>
           </a>
         </div>
-        <div class="nav-menu-sub flex items-center h-full">
+        <div class="flex justify-evenly items-center w-1/4">
           <% if (user) { %>
+          <li class="nav-item mx-4">
+            <a href="#" class="nav-link"><%= user.name %></a>
+          </li>
           <li class="nav-item mx-4">
             <a href="/user-collection" class="nav-link">Collections</a>
           </li>
@@ -238,30 +241,32 @@
               <h3>Empty</h3>
               <% } else { %>
               <% mediLockerSignedURLs.forEach((info) => { %>
-              <div class="flex items-center p-8 bg-white shadow-xl rounded-lg">
+              <div class="flex items-center m-2 p-8 bg-white shadow-xl rounded-lg">
                 <a href="<%= info.signedURL %>">
-                 <% if(info.imgType === 1){ %>
-                    <div
+                  <% if(info.imgType === 1){ %>
+                  <div
                     class="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 rounded-full mr-6">
                     <img src="<%= info.signedURL %>" class="h-6 w-6"></img>
                   </div>
-                 
-                 <% } else { %>
+
+                  <% } else { %>
                   <div
                     class="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 rounded-full mr-6">
                     <img src="/images/pdf-image.png" class="h-6 w-6"></img>
                   </div>
-                 <% }  %>
+                  <% }  %>
                 </a>
                 <div>
                   <span class="block text-2xl font-bold"><%= info.ReportName %></span>
                   <span class="block text-2xl"><%= info.date %></span>
                   <div style="display: flex;">
                     <button
-                      class="block px-4 py-2 duration-500 bg-red-500 text-white rounded-xl hover:bg-red-700 hover:scale-105 text-gray-500"><a href="<%= info.signedURL %>">Open</a></button>
+                      class="block px-4 py-2 m-2 duration-500 bg-sky-500 text-white rounded-xl hover:bg-sky-700 hover:scale-105 text-gray-500"><a
+                        href="<%= info.signedURL %>">Open</a></button>
 
-                      <button
-                      class="block px-4 py-2 duration-500 bg-red-500 text-white rounded-xl hover:bg-red-700 hover:scale-105 text-gray-500"><a href="/crud/delete-mediLocker-data/<%= info.uniqueID %>">Delete</a></button>
+                    <button
+                      class="block px-4 py-2 m-2 duration-500 bg-red-500 text-white rounded-xl hover:bg-red-700 hover:scale-105 text-gray-500"><a
+                        href="/crud/delete-mediLocker-data/<%= info.uniqueID %>">Delete</a></button>
                   </div>
                 </div>
               </div>
@@ -272,22 +277,6 @@
         </div>
       </div>
     </section>
-
-    <!-- <a href="/mediLocker-add-form"> Add files</a>
-
-<h1>Medilocker - Your own private medical data</h1>
-<% if (mediLockerSignedURLs.length === 0){ %>
-<h3>Empty</h3>
-<% } else { %>
-<% mediLockerSignedURLs.forEach((info) => { %>
-
-<img src="<%= info.signedURL %>" alt="Image" style="height: 20px; width: auto;">
-<h3>Date: <%= info.date %></h3>
-<p>Report name/type: <%= info.ReportName %></p>
-<a href="/crud/delete-mediLocker-data/<%= info.uniqueID %>"><button
-    style="height: 10px; width: auto; border: 2px solid black;">Delete</button></a>
-<% }); %>
-<% } %> -->
 
     <%- include('footer.ejs') %>
     <%- include('bottom.ejs') %>
