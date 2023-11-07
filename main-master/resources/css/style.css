@@ -46,9 +46,6 @@ a {
 
 .nav-menu {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 60px;
 }
 
 .nav-link {
@@ -86,6 +83,57 @@ a {
 
 .dropdown:hover .dropdown-menu {
     display: block;
+}
+
+.chat-container {
+    overflow: auto;
+    max-height: 350px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-container .user-ques:nth-child(odd) {
+    border: 1px solid black;
+    max-width: 45%;
+    position: relative;
+    margin: 10px 12px;
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    align-self: flex-end;
+}
+
+.chat-container .user-ques:nth-child(even) {
+    border: 1px solid red;
+    position: relative;
+    max-width: 45%;
+    margin: 10px 12px;
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    align-self: flex-start;
+}
+
+.login-username-error {
+    border: 16px solid #f3f3f3;
+    /* Light grey */
+    border-top: 16px solid #3498db;
+    /* Blue */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* HAMBURGER */
@@ -266,6 +314,7 @@ form .btn input[type="submit"] {
 }
 
 .modal {
+    z-index: 999;
     transition: opacity 0.25s ease;
 }
 
