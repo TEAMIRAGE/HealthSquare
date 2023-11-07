@@ -1,17 +1,15 @@
 <%- include('header.ejs') %>
 
 <!-- action= "/api/mediLocker/Upload" method="post" enctype="multipart/form-data" -->
-<section
-  class="relative flex items-center justify-center top-0 h-screen w-full"
->
-  <div class="w-[60%] bg-leftGreenGradient h-full"></div>
-  <div class="w-[60%] bg-rightGreenGradient h-full"></div>
-  <div class="absolute flex flex-col w-full h-full">
+<section class="cover bg-black w-full h-screen">
+  <div class="relative flex h-screen content-center items-center justify-center pt-16 pb-32">
+    <div class="absolute top-0 h-full w-full bg-cover bg-center">
+      <img src="../images/bg-1.jpg" class="w-screen h-full">
+    </div>
+    <div class="absolute top-0 h-full w-full bg-black/75 bg-cover bg-center"></div>
     <div class="flex flex-col justify-center items-center relative z-10 mt-16">
-      <div class="mb-2 mt-24 xsm:w-full">
-        <h1
-          class="text-white text-center text-4xl md:text-5xl xl:text-6xl font-bold"
-        >
+      <div class="mt-24 xsm:w-full">
+        <h1 class="text-white text-center mb-12 text-4xl md:text-5xl xl:text-6xl font-bold">
           Upload your reports at MediLab.
         </h1>
         <div class="flex items-center justify-center h-full xsm:w-full">
