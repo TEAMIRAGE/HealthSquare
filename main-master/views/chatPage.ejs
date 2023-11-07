@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="utf-8" />
+    <title>HealthSquare</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/ac5c1ad2cc.js" crossorigin="anonymous"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&family=Lobster&family=Pacifico&family=Roboto&family=Sacramento&family=Zeyada&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Freehand&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+
+
+    /* font-family: 'Roboto', sans-serif;
+   font-family: 'Indie Flower', cursive;
+   font-family: 'Lobster', cursive;
+   font-family: 'Pacifico', cursive;
+   font-family: 'Zeyada', cursive;
+   font-family: 'Nunito Sans', sans-serif;
+   <a href="https://www.flaticon.com/free-icons/book" title="book icons">Book icons created by Smashicons - Flaticon</a> */
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    html,
+    body {
+        height: 100%;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .navbar {
+        color: black;
+        width: 100%;
+        z-index: 999;
+        min-height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 24px;
+    }
+
+    .nav-menu {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 60px;
+    }
+
+    .nav-link {
+        position: relative;
+        text-transform: uppercase;
+        font-weight: 900;
+    }
+
+    .nav-link::before {
+        content: "";
+        position: absolute;
+        display: block;
+        width: 100%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: #000;
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .nav-link:hover::before {
+        transform: scaleX(1);
+    }
+
+    .nav-branding {
+        font-size: 3.2rem;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .modal {
+        transition: opacity 0.25s ease;
+    }
+
+    body.modal-active {
+        overflow-x: hidden;
+        overflow-y: visible !important;
+    }
+</style>
+
+<body>
+    <main class="h-screen">
+        <nav class="navbar text-black bg-opacity-50 top-0 left-0 right-0">
+            <ul class="nav-menu w-[100%] flex justify-around">
+                <div class="nav-menu-sub flex items-center">
+                    <% if (user) { %>
+                    <div class="p-10">
+                        <div class="dropdown inline-block relative cursor-pointer">
+                            <span class="py-2 px-2 rounded inline-flex items-center">
+                                <span class="nav-link">Services</span>
+                                <svg class="ml-2 text-white fill-black h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                </svg>
+                            </span>
+                            <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
+                                <li>
+                                    <a class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                        href="/bloodReport-Analysis">Blood Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                        href="/predicter-form/1">Fracture
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="rounded-b bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                        href="#">Thyroid
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="rounded-b bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                        href="/predicter-form/4">Tumor
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <li class="nav-item -mx-6">
+                        <a href="/mediLocker" class="nav-link">HealthLocker</a>
+                    </li>
+                </div>
+                <% } else { %>
+                <div class="p-10">
+                    <div class="dropdown inline-block relative cursor-pointer">
+                        <span class="py-2 px-4 rounded inline-flex items-center">
+                            <span class="nav-link">Services</span>
+                            <svg class="ml-2 text-white fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                        </span>
+                        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
+                            <li>
+                                <a class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                    href="/bloodReport-Analysis">Blood Report
+                                </a>
+                            </li>
+                            <li>
+                                <a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                    href="/predicter-form/1">Fracture
+                                </a>
+                            </li>
+                            <li>
+                                <a class="rounded-b bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                    href="#">Thyroid
+                                </a>
+                            </li>
+                            <li>
+                                <a class="rounded-b bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                                    href="/predicter-form/4">Tumor
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <% } %>
+                </div>
+                <div>
+                    <a href="/" class="nav-branding w-auto">
+                        <i class="fa-solid fa-laptop-medical"></i>
+                        Health<sup>2</sup>
+                    </a>
+                </div>
+                <div class="nav-menu-sub flex items-center h-full">
+                    <% if (user) { %>
+                    <li class="nav-item mx-4">
+                        <a href="/user-collection" class="nav-link">Collections</a>
+                    </li>
+                    <li class="nav-item mx-4">
+                        <a href="/logout" class="nav-link">Logout</a>
+                    </li>
+                    <% } else { %>
+                    <li class="nav-item mx-4">
+                        <a href="/login" class="nav-link">Login</a>
+                    </li>
+                    <li class="nav-item mx-4">
+                        <a href="/signup" class="nav-link">Signup</a>
+                    </li>
+                    <% } %>
+                </div>
+            </ul>
+        </nav>
+
+        <div class="flex h-96 antialiased text-gray-800">
+            <div class="flex flex-row h-full w-full overflow-x-hidden">
+                <div class="flex flex-col flex-auto h-full p-6">
+                    <div class="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-4">
+                        <div class="flex flex-col h-full overflow-x-auto mb-4">
+                            <div class="flex flex-col h-full">
+                                <div class="grid grid-cols-12 gap-y-2">
+                                    <div class="col-start-1 col-end-8 p-3 rounded-lg">
+                                        <div class="flex flex-row items-center">
+                                            <div
+                                                class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                                                A
+                                            </div>
+                                            <div class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
+                                                <div>Hey How are you today?</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-start-6 col-end-13 p-3 rounded-lg">
+                                        <div class="flex items-center justify-start flex-row-reverse">
+                                            <div
+                                                class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                                                B
+                                            </div>
+                                            <div
+                                                class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
+                                                <div>I'm ok what about you?</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4">
+                            <div class="flex-grow ml-4">
+                                <div class="relative w-full">
+                                    <input type="text"
+                                        class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <button
+                                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0">
+                                    <span>Send</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('footer.ejs') %>
+        <%- include('bottom.ejs') %>

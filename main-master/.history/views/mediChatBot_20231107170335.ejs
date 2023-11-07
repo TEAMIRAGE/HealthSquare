@@ -1,0 +1,144 @@
+<%- include('header.ejs') %>
+<section class="cover bg-customColorBlack w-full h-screen">
+  <div class="h-full">
+    <img src="../images/bg3.jpg" class="cover blur-[6px] w-full h-full opacity-40" />
+  </div>
+  <div class="flex flex-col justify-center items-center absolute top-0 left-0 right-0 bottom-0">
+    <div
+      class="border-4 bg-white w-11/12 border-solid border-white xsm:m-4 p-2 md:px-10 py-6 rounded-xl flex-col justify-center items-center">
+      <div class="chat-container bg-sky-50 rounded-xl"></div>
+      <div class="flex flex-col h-auto overflow-x-auto my-4 bg-sky-50 rounded-xl">
+        <div class="flex flex-col h-full">
+          <div class="grid grid-cols-12 gap-y-2">
+            <div class="col-start-13 -col-end-6 p-3 rounded-lg">
+              <div class="flex flex-row items-center">
+                <div class="relative mr-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
+                  <div class="user-ques m-2 text-red-900"></div>
+                </div>
+                <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                  <i class="fa-solid fa-user text-white text-md"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-start-1 col-end-8 p-3 rounded-lg">
+              <div class="flex items-center justify-start">
+                <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                  <i class="fa-solid fa-robot text-md text-white"></i>
+                </div>
+                <div class="relative ml-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
+                  <div id="data-id" data-id="<%= details._id %>"></div>
+                  <div class="login-username-error m-2 text-red-900"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <form class="test-form">
+        <div class="flex justify-center mb-4" id="data-id" data-id="<%= details._id %>">
+        </div>
+        <div class="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-sky-50 h-full p-4">
+          <div class="flex flex-row items-center h-16 rounded-xl w-full px-4">
+            <div class="flex-grow ml-4">
+              <div class="relative w-full">
+                <input type="text" type="text" name="username"
+                  class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+              </div>
+            </div>
+            <div class="ml-4">
+              <button
+                class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0">
+                <input class="cursor-pointer" type="submit" value="Submit" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.querySelector(".test-form");
+  const userNameError = document.querySelector(".login-username-error");
+  const userQues = document.querySelector(".user-ques");
+  const hiddenId = document.getElementById("data-id");
+  const dataId = hiddenId.getAttribute("data-id");
+  const chatContainer = document.querySelector(".chat-container");
+  const userQuesElement = document.querySelector('.user-ques');
+  const loadingImage = document.querySelector('#loading');
+
+  const conversationHistory = [];
+
+  // function toggleDisplay() {
+  //   if(loadingImage.display.style === "none") {
+      
+  //   }
+  // }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // reset errors
+    userNameError.textContent = "Please Wait !";
+
+    const username = form.username.value;
+    userQues.textContent = username;
+
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/AI-chat-answer/${dataId}`, {
+          method: "POST",
+          body: JSON.stringify({
+            username: username,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      function displayConversation() {
+        chatContainer.innerHTML = "";
+
+        conversationHistory.forEach((entry) => {
+          const messageDiv = document.createElement("div");
+          messageDiv.classList.add('user-ques');
+          // messageDiv.className = entry.role;
+          messageDiv.textContent = entry.message;
+          const newDiv = userQuesElement.insertAdjacentElement('afterend', messageDiv);
+          chatContainer.appendChild(newDiv);
+
+          userQues.textContent = "";
+          userNameError.textContent = "";
+
+          // toggleDisplay();
+        });
+      }
+
+      // if (data.message) {
+      //   //data.newUser.message
+      //   // .newUser is variable returned through json object from above route
+      //   userNameError.textContent = data.message; // data.newUser.message
+      // }
+      if (data.message) {
+        conversationHistory.push({
+          role: "user",
+          message: username
+        });
+        conversationHistory.push({
+          role: "ai",
+          message: data.message
+        });
+
+        displayConversation();
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  });
+</script>
+
+<%- include('footer.ejs') %>
