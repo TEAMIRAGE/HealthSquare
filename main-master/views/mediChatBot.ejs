@@ -58,7 +58,7 @@
     inputText.value= '';
 
     try {
-      const res = await fetch(`http://192.168.29.125:5000/remedies_ai`, {
+      const res = await fetch(`http://localhost:5000/remedies_ai`, {
         method: "POST",
         body: JSON.stringify({
           username: username,

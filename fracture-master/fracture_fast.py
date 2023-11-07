@@ -1,18 +1,17 @@
-from flask import Flask, request, jsonify
-import os
-from flask_cors import CORS
-import numpy as np
-from PIL import Image
-import cv2
-from keras.models import load_model
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from google.cloud import storage
-import requests
+from keras.models import load_model
+from PIL import Image
+import numpy as np
+import cv2
+import os
+from pydantic import BaseModel
 
+app = FastAPI()
 
-
-app = Flask(__name__ if __name__ != "__main__" else "your_module_name")
-CORS(app)
-
+class ImageName(BaseModel):
+    img_name: str
 
 def download_blob(bucket_name, source_blob_name, destination_file_name, service_account_file):
     # Instantiate a client using the service account key file
@@ -69,10 +68,10 @@ def has_fracture(image_path):
     fracture_present = predicted_class == 1
     return fracture_present
 
-@app.route("/fracture-Processing-result/<img_name>", methods=['GET'])
-def fracture_process(img_name):
+@app.get("/fracture-Processing-result/{img_name}")
+async def fracture_process(img_name: str):
     try:
-        print("Image get name: ",img_name)
+        print("Image get name: ", img_name)
         bucket_name = 'criticalstrike1'
         source_blob_name = img_name
         destination_file_name = f'save/{source_blob_name}'
@@ -92,28 +91,13 @@ def fracture_process(img_name):
 
         if fracture_result is None:
             print("The provided image is not Correct.")
-            return jsonify({"data": "The provided image is not Correct."}), 201
+            return JSONResponse(content={"data": "The provided image is not Correct."}, status_code=201)
         elif fracture_result:
             print("Fracture is present.")
-            return jsonify({"data": "Fracture is present."}), 201
+            return JSONResponse(content={"data": "Fracture is present."}, status_code=201)
         else:
             print("No fracture is detected.")
-            return jsonify({"data": "No fracture is detected."}), 201
+            return JSONResponse(content={"data": "No fracture is detected."}, status_code=201)
     except Exception as e:
         print(e)
-        return jsonify({"data": "Error occurred"}), 500
-
-
-
-
-if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(host='0.0.0.0', port=8000)
-
-
-
-
-
-        
-        
-        
+        raise HTTPException(status_code=500, detail="Error occurred")

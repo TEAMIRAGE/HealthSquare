@@ -1,6 +1,7 @@
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import vertexai
 from vertexai.language_models import TextGenerationModel
 from reportlab.lib.pagesizes import letter, inch
@@ -11,30 +12,45 @@ import pymongo
 from bson import ObjectId
 from google.cloud import storage
 import os
+import uvicorn
+from google.oauth2 import service_account
 
-app = Flask(__name__ if __name__ != "__main__" else "your_module_name")
-CORS(app)
+# Initialize FastAPI app
+app = FastAPI()
+credentials = service_account.Credentials.from_service_account_file('pure-silicon-390116-5d3c01f54cc0.json')
 
-vertexai.init(project="linear-yen-400506", location="us-central1")
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+#Initialize VertexAI
+vertexai.init(project="linear-yen-400506", location="us-central1", credentials=credentials)
 parameters = {
-    "max_output_tokens": 256,
-    "temperature": 0.2,
+    "max_output_tokens" :1024,
+    "temperature" : 0.2,
     "top_p": 0.8,
     "top_k": 40
 }
+
 model = TextGenerationModel.from_pretrained("text-bison")
 
 
-@app.route("/thyroidReport-manual-Processing-result", methods=['POST'])
-def thyroid_report():
+@app.post("/thyroidReport-manual-Processing-result")
+async def thyroid_report(
+    thyroidReport_t3: float,
+    thyroidReport_t4: float,
+    thyroidReport_ths: float,
+    userId: str
+):
     try:
-        T3 = request.args.get('thyroidReport_t3')
-        T4 = request.args.get('thyroidReport_t4')
-        THS = request.args.get('thyroidReport_ths')
-
         # Create the input text with sysargs values
-        input_text = f"""input:My Thyroid Report values of "TOTAL TRIIODOTHYRONINE(T3)" is {T3},
-        "TOTAL THYROXIN(T4)" is {T4},"THYROID STIMULATING HORMONE(THS)" is {THS} give me the full diagnosis of the report"""
+        input_text = f"""input:My Thyroid Report values of "TOTAL TRIIODOTHYRONINE(T3)" is {thyroidReport_t3},
+        "TOTAL THYROXIN(T4)" is {thyroidReport_t4},"THYROID STIMULATING HORMONE(THS)" is {thyroidReport_ths} give me the full diagnosis of the report"""
 
         # Generate the response
         response = model.predict(input_text, **parameters)
@@ -71,7 +87,7 @@ def thyroid_report():
         elements.append(Spacer(1, 24))
 
         # Get the ObjectId string from command-line arguments
-        target_object_id_str = sys.argv[4]
+        target_object_id_str = userId
         # Convert the ObjectId string to ObjectId
         target_object_id = ObjectId(target_object_id_str)
         # Replace with your MongoDB Atlas connection string
@@ -113,9 +129,9 @@ def thyroid_report():
         # Define blood test results using sys arguments
         thyroid_test_results = [
             ("Test Name", "Result", "Reference Range"),
-            ("TOTAL TRIIODOTHYRONINE(T3)", f"{T3}", "80-200 ng/dL"),
-            ("TOTAL THYROXIN(T4)", f"{T4}", "0.8-1.8 ng/dL"),
-            ("THYROID STIMULATING HORMONE(THS)", f"{THS}", "0.4-4.0 mIU/L"),
+            ("TOTAL TRIIODOTHYRONINE(T3)", f"{thyroidReport_t3}", "80-200 ng/dL"),
+            ("TOTAL THYROXIN(T4)", f"{thyroidReport_t4}", "0.8-1.8 ng/dL"),
+            ("THYROID STIMULATING HORMONE(THS)", f"{thyroidReport_ths}", "0.4-4.0 mIU/L"),
         ]
 
         # Create a table with test results
@@ -136,7 +152,7 @@ def thyroid_report():
         response_text = response.response_text if hasattr(response, "response_text") else str(response)
 
         # Now, create the diagnosis string
-        diagnosis = Paragraph(f"Diagnosis: <b>{response_text}</b>", normal_style)
+        diagnosis = Paragraph(f"Diagnosis: <b>{response.text}</b>", normal_style)
         elements.append(diagnosis)
         elements.append(Spacer(1, 12))
 
@@ -160,7 +176,7 @@ def thyroid_report():
         bucket_name = "criticalstrike1"
         gcs_object_name = f"{current_date_time}_ThyroidReport.pdf"  # Updated object name format
         # Initialize a GCS client
-        client = storage.Client()
+        client = storage.Client(credentials=credentials)
         # Get the bucket
         bucket = client.get_bucket(bucket_name)
         # Upload the file to GCS
@@ -183,20 +199,18 @@ def thyroid_report():
         }
 
         # Insert the document into the new collection
-        new_collection.insert_one(pdf_filename)
+        new_collection.insert_one(document1)
         if os.path.exists(pdf_filename):
             os.remove(pdf_filename)
             print(f"File {pdf_filename} has been deleted.")
         else:
             print(f"The file {pdf_filename} does not exist.")
-        return jsonify({"message": gcs_object_name}), 201
+        return JSONResponse(content={"message": gcs_object_name}, status_code=201)
+    
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error occurred"}), 500
+        return JSONResponse(content={"message": "Error occurred"}, status_code=500)
 
-@app.route('/')
-def home():
-    return "Welcome to the Home Page!"
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+@app.get('/')
+async def root():
+    return {"message": "Welcome to the root path!"}

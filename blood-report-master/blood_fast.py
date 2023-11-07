@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import vertexai
 from vertexai.language_models import TextGenerationModel
@@ -11,11 +12,24 @@ import pymongo
 from bson import ObjectId
 from google.cloud import storage
 import os
+import uvicorn
+from google.oauth2 import service_account
 
-app = Flask(__name__ if __name__ != "__main__" else "your_module_name")
-CORS(app)
+# Initialize FastAPI app
+app = FastAPI()
+credentials = service_account.Credentials.from_service_account_file('pure-silicon-390116-5d3c01f54cc0.json')
 
-vertexai.init(project="linear-yen-400506", location = "us-central1")
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+#Initialize VertexAI
+vertexai.init(project="linear-yen-400506", location="us-central1", credentials=credentials)
 parameters = {
     "max_output_tokens" :1024,
     "temperature" : 0.2,
@@ -25,24 +39,23 @@ parameters = {
 
 model = TextGenerationModel.from_pretrained("text-bison")
 
-
-@app.route("/bloodReport-manual-Processing-result", methods=['POST'])
-def blood_report():
+@app.post("/bloodReport-manual-Processing-result")
+async def blood_report(
+    bloodReport_hemoglobin: float,
+    bloodReport_rbc: int,
+    bloodReport_hematocrit: int,
+    bloodReport_wbc: int,
+    bloodReport_neutrophils: int,
+    bloodReport_lymphocytes: int,
+    bloodReport_monocytes: int,
+    bloodReport_eosinophils: int,
+    bloodReport_platelet: int,
+    bloodReport_mcv: int,
+    bloodReport_mch: int,
+    bloodReport_mchc: int,
+    userId: str
+):
     try:
-        bloodReport_hemoglobin = request.args.get('bloodReport_hemoglobin')
-        bloodReport_rbc = request.args.get('bloodReport_rbc')
-        bloodReport_hematocrit = request.args.get('bloodReport_hematocrit')
-        bloodReport_wbc = request.args.get('bloodReport_wbc')
-        bloodReport_neutrophils = request.args.get('bloodReport_neutrophils')
-        bloodReport_lymphocytes = request.args.get('bloodReport_lymphocytes')
-        bloodReport_monocytes = request.args.get('bloodReport_monocytes')
-        bloodReport_eosinophils = request.args.get('bloodReport_eosinophils')
-        bloodReport_platelet = request.args.get('bloodReport_platelet')
-        bloodReport_mcv = request.args.get('bloodReport_mcv')
-        bloodReport_mch = request.args.get('bloodReport_mch')
-        bloodReport_mchc = request.args.get('bloodReport_mchc')
-        userId = request.args.get('userId')
-
         # Create the input text with sysargs values
         input_text = f"""input:My Blood Report values of "White Blood Cell" is {bloodReport_wbc},
         "Red Blood Cell" is {bloodReport_rbc},"Hemoglobin" is {bloodReport_hemoglobin},
@@ -50,7 +63,7 @@ def blood_report():
         "MCH" is {bloodReport_mch},"MCHC" is {bloodReport_mchc},
         "Platelet" is {bloodReport_platelet},"Neutrophils" is {bloodReport_neutrophils},
         "Lymphocytes" is {bloodReport_lymphocytes},"Monocytes" is {bloodReport_monocytes},
-        "Eosinophils" is {bloodReport_eosinophils} give me a detailed diagnosisof the report"""
+        "Eosinophils" is {bloodReport_eosinophils} give me a detailed diagnosis of the report"""
 
         # Generate the response
         response = model.predict(input_text, **parameters)
@@ -159,7 +172,7 @@ def blood_report():
         response_text = response.response_text if hasattr(response, "response_text") else str(response)
 
         # Now, create the diagnosis string
-        diagnosis = Paragraph(f"Diagnosis: <b>{response_text}</b>", normal_style)
+        diagnosis = Paragraph(f"Diagnosis: <b>{response.text}</b>", normal_style)
         elements.append(diagnosis)
         elements.append(Spacer(1, 12))
 
@@ -179,7 +192,7 @@ def blood_report():
         bucket_name = "criticalstrike1"
         gcs_object_name = f"{current_date_time}_BloodReport.pdf"  # Updated object name format
         # Initialize a GCS client
-        client = storage.Client()
+        client = storage.Client(credentials=credentials)
         # Get the bucket
         bucket = client.get_bucket(bucket_name)
         # Upload the file to GCS
@@ -211,22 +224,14 @@ def blood_report():
         else:
             print(f"The file {pdf_filename} does not exist.")
 
-        return jsonify({"message": gcs_object_name}), 201
-
+        return JSONResponse(content={"message": gcs_object_name}, status_code=201)
+    
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error occurred"}), 500
+        return JSONResponse(content={"message": "Error occurred"}, status_code=500)
 
+@app.get('/')
+async def root():
+    return {"message": "Welcome to the root path!"}
+    
 
-if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(host='0.0.0.0', port=7000)
-
-
-
-
-
-
-
-
-        

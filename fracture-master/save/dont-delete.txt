@@ -1,0 +1,3 @@
+Dont delete this file, otherwise git will delete it.
+Reason: Without this file, this folder will be empty and git will delete empty folder
+Use: This file is used by one of our python programs

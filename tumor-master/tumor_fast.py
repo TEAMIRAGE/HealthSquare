@@ -1,18 +1,17 @@
-from flask import Flask, request, jsonify
-import os
-from flask_cors import CORS
-import numpy as np
-from PIL import Image
-import cv2
-from keras.models import load_model
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from google.cloud import storage
-import requests
+from keras.models import load_model
+from PIL import Image
+import numpy as np
+import cv2
+import os
+from pydantic import BaseModel
 
+app = FastAPI()
 
-
-app = Flask(__name__ if __name__ != "__main__" else "your_module_name")
-CORS(app)
-
+class ImageName(BaseModel):
+    img_name: str
 
 def download_blob(bucket_name, source_blob_name, destination_file_name, service_account_file):
     # Instantiate a client using the service account key file
@@ -66,8 +65,10 @@ def is_radiograph(image_path):
     else:
         return False
 
-@app.route("/tumor-Processing-result/<img_name>", methods=['GET'])
-def tumour_process(img_name):
+model = load_model("tumor_classification_model.h5")
+
+@app.get("/tumor-Processing-result/{img_name}")
+async def tumour_process(img_name: str):
     try:
         print("Image get name: ",img_name)
         bucket_name = 'criticalstrike1'
@@ -82,44 +83,18 @@ def tumour_process(img_name):
         
 
 
-
-        if is_radiograph(image_path):
-            # Classify the tumor image
-            predicted_class = classify_tumor_image(image_path)
-
-            if os.path.exists(destination_file_name):
-                os.remove(destination_file_name)
-                print(f"File {destination_file_name} has been deleted.")
-            else:
-                print(f"The file {destination_file_name} does not exist.")
-
-            print("Predicted class:", predicted_class)
-            return jsonify({"message": predicted_class}), 201
+        if is_radiograph(destination_file_name):
+            predicted_class = classify_tumor_image(destination_file_name)
+            # Delete the file after processing
+            os.remove(destination_file_name)
+            return {"message": predicted_class}
         else:
-            print("Wrong image")
-
-            if os.path.exists(destination_file_name):
-                os.remove(destination_file_name)
-                print(f"File {destination_file_name} has been deleted.")
-            else:
-                print(f"The file {destination_file_name} does not exist.")
-
-            return jsonify({"message": "Wrong Image"}), 201
+            # Delete the file if not a radiograph
+            os.remove(destination_file_name)
+            return JSONResponse(content={"message": "The provided image is not a radiograph."}, status_code=400)
     except Exception as e:
-        print(e)
-        return jsonify({"message": "Error occurred"}), 500
+        if os.path.exists(destination_file_name):
+            os.remove(destination_file_name)
+        raise HTTPException(status_code=500, detail=str(e))
 
-
-
-
-if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(host='0.0.0.0', port=6000)
-
-
-
-
-
-        
-        
-        
+            

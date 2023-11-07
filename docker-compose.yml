@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  node_app:
+    build:
+      context: ./main-master  # Path to your Node.js app directory
+    ports:
+      - "3000:3000"  # Assuming your Node.js app runs on port 3000
+    networks:
+      - some-net
+
+  blood_app:
+    build:
+      context: ./blood-report-master  # Path to your Flask app directory
+    ports:
+      - "7000:7000"  # Assuming your Flask app runs on port 5000
+    networks:
+      - some-net
+
+  thyroid_app:
+    build:
+      context: ./thyroid-master  # Path to your Flask app directory
+    ports:
+      - "4000:4000"  # Assuming your Flask app runs on port 5000
+    networks:
+      - some-net
+
+  fracture_app:
+    build:
+      context: ./fracture-master  # Path to your Flask app directory
+    ports:
+      - "8000:8000"  # Assuming your Flask app runs on port 5000
+    networks:
+      - some-net
+
+  tumor_app:
+    build:
+      context: ./tumor-master  # Path to your Flask app directory
+    ports:
+      - "6000:6000"  # Assuming your Flask app runs on port 5000
+    networks:
+      - some-net
+
+  chatbot_app:
+    build:
+      context: ./remedies-bot-master  # Path to your Flask app directory
+    ports:
+      - "5000:5000"  # Assuming your Flask app runs on port 5000
+    networks:
+      - some-net    
+
+networks:
+  some-net:
+    driver: bridge

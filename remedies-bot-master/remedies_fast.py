@@ -1,14 +1,25 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import vertexai
 from vertexai.language_models import TextGenerationModel
-from flask_cors import CORS
 from google.oauth2 import service_account
+from pydantic import BaseModel
 
-app = Flask(__name__ if __name__ != "__main__" else "your_module_name")
-CORS(app)
+app = FastAPI()
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Assuming the credentials setup and Vertex AI initialization is similar to Flask's
 credentials = service_account.Credentials.from_service_account_file('pure-silicon-390116-5d3c01f54cc0.json')
 
-vertexai.init(project="linear-yen-400506", location="us-central1")
+vertexai.init(project="linear-yen-400506", location="us-central1", credentials=credentials)
 parameters = {
     "max_output_tokens": 1024,
     "temperature": 0.2,
@@ -16,12 +27,12 @@ parameters = {
     "top_k": 40
 }
 model = TextGenerationModel.from_pretrained("text-bison@001")
+class UserInput(BaseModel):
+    username: str
 
-
-@app.route('/remedies_ai', methods=['POST'])
-def remedies_chatbot():
+@app.post('/remedies_ai')
+async def remedies_chatbot(user_input: UserInput):
     try:
-        user_input = request.json.get("username")
         response = model.predict(
             f"""input: i am having a headache
         output: Home remedies for a headache are:
@@ -70,14 +81,12 @@ def remedies_chatbot():
             **parameters
         )
         print(f"Response from Model: {response.text}")
-        return jsonify({"message": response.text}), 201
+        return JSONResponse(content={"message": response.text}, status_code=201)
     except Exception as e:
         print("Error occurred: ", e)
-        return jsonify({"message": "Error occurred"}), 500
-
-
-
-
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+        raise HTTPException(status_code=500, detail="Error occurred")
+    
+@app.get('/')
+async def root():
+    return {"message": "Welcome to the Home Page!"}
+    
