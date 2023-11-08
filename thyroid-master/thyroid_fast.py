@@ -195,7 +195,7 @@ async def thyroid_report(
         document1 = {
             "date": current_date,
             "Imagename": gcs_object_name,
-            "UserId": target_object_id_str
+            "UserId": target_object_id
         }
 
         # Insert the document into the new collection
